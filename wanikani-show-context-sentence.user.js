@@ -25,6 +25,13 @@ var translation = "";
 var sentenceNode = null;
 var wk_items = null;
 
+function hideTranslation(hide, node) {
+    if (!node && sentenceNode)
+      node = sentenceNode.querySelector('span + span');
+
+    if (node) node.style.backgroundColor = hide ? 'white' : '#a100f1';
+}
+
 function format_sentence(sentence, characters) {
     if (!characters)
         return sentence;
@@ -78,12 +85,28 @@ function get_new_sentence()
   
     sentenceNode.querySelector('span').innerHTML = sentence;
     sentenceNode.querySelector('span + span').innerHTML = translation;
+
+    hideTranslation(true, sentenceNode.querySelector('span + span'));
 }
 
 window.addEventListener(`willShowNextQuestion`, e => {
 	console.log(e.detail);
   currSubject = e.detail.subject;
   get_new_sentence();
+});
+
+window.addEventListener(`didAnswerQuestion`, e => {
+  const questionType = e.detail.questionType;
+  const passed = e.detail.results.passed;
+  
+  // if got a meaning question correct, show the translation
+  if (questionType === 'meaning' && passed)
+    hideTranslation(false);
+});
+
+// if passed a subject, show the translation
+window.addEventListener(`didChangeSRS`, e => {
+  hideTranslation(false);
 });
 
 var config = {
@@ -154,8 +177,8 @@ const quizInput = document.querySelector('.quiz-input');
   // show/hide translation on hover
   const translationSpan = sentenceNode.querySelector('span:last-child');
   if (translationSpan) {
-    translationSpan.addEventListener('mouseover', e => e.target.style.backgroundColor = '#a100f1');
-    translationSpan.addEventListener('mouseout', e => e.target.style.backgroundColor = 'white');
+    translationSpan.addEventListener('mouseover', e => hideTranslation(false, e.target));
+    translationSpan.addEventListener('mouseout', e => hideTranslation(true, e.target));
   }
 
   startup_wkof();
