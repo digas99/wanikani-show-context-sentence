@@ -9,8 +9,6 @@
 // @license     Apache, https://www.apache.org/licenses/LICENSE-2.0
 // @author      skatefriday
 // @description Show context sentence on review page.
-// @downloadURL https://update.greasyfork.org/scripts/421496/WaniKani%20Show%20Context%20Sentence.user.js
-// @updateURL https://update.greasyfork.org/scripts/421496/WaniKani%20Show%20Context%20Sentence.meta.js
 // ==/UserScript==
 
 (function() {
