@@ -24,6 +24,7 @@ var sentence = "";
 var translation = "";
 var sentenceNode = null;
 var wk_items = null;
+var translationVisible = false;
 
 function hideTranslation(hide, node) {
     if (!node && sentenceNode)
@@ -87,6 +88,7 @@ function get_new_sentence()
     sentenceNode.querySelector('span + span').innerHTML = translation;
 
     hideTranslation(true, sentenceNode.querySelector('span + span'));
+    translationVisible = false;
 }
 
 window.addEventListener(`willShowNextQuestion`, e => {
@@ -100,13 +102,16 @@ window.addEventListener(`didAnswerQuestion`, e => {
   const passed = e.detail.results.passed;
   
   // if got a meaning question correct, show the translation
-  if (questionType === 'meaning' && passed)
+  if (questionType === 'meaning' && passed) {
     hideTranslation(false);
+    translationVisible = true;
+  }
 });
 
 // if passed a subject, show the translation
 window.addEventListener(`didChangeSRS`, e => {
   hideTranslation(false);
+  translationVisible = true;
 });
 
 var config = {
@@ -154,6 +159,10 @@ function install_context_sentence_css()
         row-gap: 12px;
         display: none;
       }
+
+      .wf-sawarabimincho span+span {
+        cursor: pointer;
+      }
     `
 
     $('head').append(better_font);
@@ -177,8 +186,8 @@ const quizInput = document.querySelector('.quiz-input');
   // show/hide translation on hover
   const translationSpan = sentenceNode.querySelector('span:last-child');
   if (translationSpan) {
-    translationSpan.addEventListener('mouseover', e => hideTranslation(false, e.target));
-    translationSpan.addEventListener('mouseout', e => hideTranslation(true, e.target));
+    translationSpan.addEventListener('mouseover', e => hideTranslation(translationVisible, e.target));
+    translationSpan.addEventListener('mouseout', e => hideTranslation(!translationVisible, e.target));
   }
 
   startup_wkof();
