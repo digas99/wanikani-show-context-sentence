@@ -86,10 +86,10 @@ function get_new_sentence()
       sentenceNode.style.display = 'none';
     }
 
-    sentenceNode.querySelector('span').innerHTML = sentence;
-    sentenceNode.querySelector('span + span').innerHTML = translation;
+    sentenceNode.querySelector('span[data-type="sentence"]').innerHTML = sentence;
+    sentenceNode.querySelector('span[data-type="translation"]').innerHTML = translation;
 
-    hideTranslation(true, sentenceNode.querySelector('span + span'));
+    hideTranslation(true, sentenceNode.querySelector('span[data-type="translation"]'));
     translationVisible = false;
 }
 
@@ -189,8 +189,8 @@ const quizInput = document.querySelector('.quiz-input');
   if (quizInput) {
     quizInput.insertAdjacentHTML('beforebegin', `
       <div class="wf-sawarabimincho">
-        <span>${sentence}</span>
-        <span style="background-color: white">${translation}</span>
+        <span data-type="sentence">${sentence}</span>
+        <span data-type="translation" style="background-color: white">${translation}</span>
       </div>
     `);
   }
@@ -198,7 +198,7 @@ const quizInput = document.querySelector('.quiz-input');
   sentenceNode = document.querySelector('.wf-sawarabimincho');
 
   // show/hide translation on hover
-  const translationSpan = sentenceNode.querySelector('span:last-child');
+  const translationSpan = sentenceNode.querySelector('span[data-type="translation"]');
   if (translationSpan) {
     translationSpan.addEventListener('mouseover', e => hideTranslation(translationVisible, e.target));
     translationSpan.addEventListener('mouseout', e => hideTranslation(!translationVisible, e.target));
