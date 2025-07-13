@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 (function() {
-  
+
 if (!window.wkof) {
     alert('The show context sentence script requires Wanikani Open Framework.\nYou will now be forwarded to installation instructions.');
     window.location.href = 'https://community.wanikani.com/t/instructions-installing-wanikani-open-framework/28549';
@@ -22,9 +22,11 @@ if (!window.wkof) {
 var currSubject = null;
 var sentence = "";
 var translation = "";
+var showTranslationKey = "control"; // https://www.toptal.com/developers/keycode/table
+var showTranslationCode = ""; // this overrides showTranslationKey if set
+var translationVisible = false;
 var sentenceNode = null;
 var wk_items = null;
-var translationVisible = false;
 
 function hideTranslation(hide, node) {
     if (!node && sentenceNode)
@@ -74,16 +76,16 @@ function get_new_sentence()
 
       sentence = item.data.context_sentences[random_index]?.ja || '';
       translation = item.data.context_sentences[random_index]?.en || '';
-      
+
       if (sentence)
         sentence = format_sentence(sentence, item.data.characters);
-      
+
     } else {
       sentence = ""
       translation = "";
       sentenceNode.style.display = 'none';
     }
-  
+
     sentenceNode.querySelector('span').innerHTML = sentence;
     sentenceNode.querySelector('span + span').innerHTML = translation;
 
@@ -100,7 +102,7 @@ window.addEventListener(`willShowNextQuestion`, e => {
 window.addEventListener(`didAnswerQuestion`, e => {
   const questionType = e.detail.questionType;
   const passed = e.detail.results.passed;
-  
+
   // if got a meaning question correct, show the translation
   if (questionType === 'meaning' && passed) {
     hideTranslation(false);
@@ -114,6 +116,18 @@ window.addEventListener(`didChangeSRS`, e => {
   translationVisible = true;
 });
 
+// show translation on keydown
+function handleKeyShowTranslation(e) {
+  const key = (showTranslationCode ? e.code : e.key)?.toLowerCase();
+  const choice = (showTranslationCode || showTranslationKey)?.toLowerCase();
+  if (key === choice)
+    hideTranslation(e.type === (!translationVisible ? 'keyup' : 'keydown'));
+}
+
+window.addEventListener('keydown', handleKeyShowTranslation);
+window.addEventListener('keyup', handleKeyShowTranslation);
+
+
 var config = {
     wk_items: {
         options: {
@@ -124,7 +138,7 @@ var config = {
 
 //
 // Note that this async operation is slower than the willShowNextQuestion above.
-// Which is why we cache the current subject as a global in the event handler.  
+// Which is why we cache the current subject as a global in the event handler.
 // Otherwise the first item, if vocabulary, will have no sentence.
 //
 function fetch_items()
@@ -132,7 +146,7 @@ function fetch_items()
     wkof.ItemData.get_items(config)
         .then((items) => { wk_items = items; })
         .then(get_new_sentence);
-    
+
     console.log("Fetched the items")
 }
 
@@ -194,5 +208,5 @@ const quizInput = document.querySelector('.quiz-input');
   install_context_sentence_css();
   console.log( "ready!" );
 });
-          
+
 })();
