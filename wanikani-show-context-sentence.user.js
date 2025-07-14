@@ -32,7 +32,7 @@ function hideTranslation(hide, node) {
     if (!node && sentenceNode)
       node = sentenceNode.querySelector('span + span');
 
-    if (node) node.style.backgroundColor = hide ? 'white' : '#a100f1';
+    if (node) node.style.display = hide ? 'none' : 'inline';
 }
 
 function format_sentence(sentence, characters) {
@@ -166,7 +166,6 @@ function install_context_sentence_css()
         font-size:1.5em; background-color:#a100f1;
         color:#ffffff;
         text-align:center;
-        padding: 10px;
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -174,8 +173,23 @@ function install_context_sentence_css()
         display: none;
       }
 
-      .wf-sawarabimincho span+span {
+      .wf-sawarabimincho span {
         cursor: pointer;
+      }
+
+      .wf-sawarabimincho span[data-type="sentence"] {
+        padding: 10px;
+      }
+
+      .wf-sawarabimincho span[data-type="sentence"]:hover {
+        background-color: rgba(254, 254, 254, 0.5);
+        border-radius: 20px;
+      }
+
+      .wf-sawarabimincho span[data-type="translation"] {
+        padding: 10px;
+        margin-top: -15px;
+        pointer-events: none;
       }
     `
 
@@ -190,7 +204,7 @@ const quizInput = document.querySelector('.quiz-input');
     quizInput.insertAdjacentHTML('beforebegin', `
       <div class="wf-sawarabimincho">
         <span data-type="sentence">${sentence}</span>
-        <span data-type="translation" style="background-color: white">${translation}</span>
+        <span data-type="translation">${translation}</span>
       </div>
     `);
   }
@@ -198,10 +212,12 @@ const quizInput = document.querySelector('.quiz-input');
   sentenceNode = document.querySelector('.wf-sawarabimincho');
 
   // show/hide translation on hover
+  const sentenceSpan = sentenceNode.querySelector('span[data-type="sentence"]');
   const translationSpan = sentenceNode.querySelector('span[data-type="translation"]');
+  hideTranslation(true, translationSpan);
   if (translationSpan) {
-    translationSpan.addEventListener('mouseover', e => hideTranslation(translationVisible, e.target));
-    translationSpan.addEventListener('mouseout', e => hideTranslation(!translationVisible, e.target));
+    sentenceSpan.addEventListener('mouseover', e => hideTranslation(translationVisible, translationSpan));
+    sentenceSpan.addEventListener('mouseout', e => hideTranslation(!translationVisible, translationSpan));
   }
 
   startup_wkof();
